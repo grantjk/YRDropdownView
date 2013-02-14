@@ -111,6 +111,7 @@ enum {
 
 + (void)setDefaultTitleFontWithName:(NSString *)fontName;
 + (void)setDefaultDetailFontWithName:(NSString *)fontName;
++ (void)setDefaultVerticalPadding:(CGFloat)padding;
 
 #pragma mark - Methods
 - (void)show:(BOOL)animated;
