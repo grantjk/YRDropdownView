@@ -9,6 +9,13 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
+enum {
+    YRDropdownViewTypeSuccess,
+    YRDropdownViewTypeNotice,
+    YRDropdownViewTypeWarning,
+    YRDropdownViewTypeError,
+}typedef YRDropdownViewType;
+
 @interface YRDropdownView : UIView
 
 @property (weak, nonatomic, readonly) NSString *titleText;
@@ -66,12 +73,44 @@
                               animated:(BOOL)animated
                              hideAfter:(float)delay;
 
++ (YRDropdownView *)showDropdownInView:(UIView *)view
+                                 title:(NSString *)title
+                                detail:(NSString *)detail
+						 accessoryView:(UIView *)accessoryView
+							 textColor:(UIColor *)textColor
+                       textShadowColor:(UIColor *)textShadowColor
+					   backgroundColor:(UIColor *)bgColor
+                              animated:(BOOL)animated
+                             hideAfter:(float)delay;
+
++ (YRDropdownView *)showDropdownInView:(UIView *)view
+                                 title:(NSString *)title
+                                detail:(NSString *)detail
+						 accessoryView:(UIView *)accessoryView
+							 textColor:(UIColor *)textColor
+                       textShadowColor:(UIColor *)textShadowColor
+                    backgroundTopColor:(UIColor *)bgTopColor
+                 backgroundBottomColor:(UIColor *)bgBottomColor
+                              animated:(BOOL)animated
+                             hideAfter:(float)delay;
+
++ (YRDropdownView *)showDropdownInView:(UIView *)view
+                                 title:(NSString *)title
+                                detail:(NSString *)detail
+						 accessoryView:(UIView *)accessoryView
+                                 style:(YRDropdownViewType)styleType
+                              animated:(BOOL)animated
+                             hideAfter:(float)delay;
+
 + (BOOL)hideDropdownInView:(UIView *)view;
 + (BOOL)hideDropdownInView:(UIView *)view animated:(BOOL)animated;
 
 + (void)presentDropdown:(YRDropdownView *)dropdownView;
 + (void)toggleRtl:(BOOL)rtl;
 + (void)toggleQueuing:(BOOL)queuing;
+
++ (void)setDefaultTitleFontWithName:(NSString *)fontName;
++ (void)setDefaultDetailFontWithName:(NSString *)fontName;
 
 #pragma mark - Methods
 - (void)show:(BOOL)animated;

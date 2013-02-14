@@ -13,5 +13,9 @@
 - (IBAction)showInView:(id)sender;
 - (IBAction)showInWindow:(id)sender;
 - (IBAction)hide:(id)sender;
+- (IBAction)showWithCustomColors:(id)sender;
 
+- (IBAction)showSuccess:(id)sender;
+- (IBAction)showNotice:(id)sender;
+- (IBAction)showError:(id)sender;
 @end

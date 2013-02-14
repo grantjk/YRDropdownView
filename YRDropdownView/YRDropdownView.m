@@ -46,6 +46,8 @@
 @property (nonatomic) BOOL isView;
 @property (nonatomic) float dropdownHeight;
 
+@property (nonatomic, assign) YRDropdownViewType styleType;
+
 + (UIImageView *)imageViewWithImage:(UIImage *)image;
 - (void)updateTitleLabel:(NSString *)newText;
 - (void)updateDetailLabel:(NSString *)newText;
@@ -61,6 +63,8 @@ static YRDropdownView *currentDropdown = nil;
 static NSMutableArray *viewQueue = nil; // for queuing - danielgindi@gmail.com
 static BOOL isRtl = NO; // keep rtl property here - danielgindi@gmail.com
 static BOOL isQueuing = NO; // keep queuing property here - gregwym
+static NSString *defaultTitleFontName = nil;
+static NSString *defaultDetailFontName = nil;
 
 + (void)toggleRtl:(BOOL)rtl;
 {
@@ -70,6 +74,15 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
 + (void)toggleQueuing:(BOOL)queuing
 {
 	isQueuing = queuing;
+}
+
++ (void)setDefaultTitleFontWithName:(NSString *)fontName
+{
+    defaultTitleFontName = fontName;
+}
++ (void)setDefaultDetailFontWithName:(NSString *)fontName
+{
+    defaultDetailFontName = fontName;
 }
 
 #pragma mark - Accessors
@@ -308,6 +321,102 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
                               animated:(BOOL)animated
                              hideAfter:(float)delay
 {
+    return [YRDropdownView showDropdownInView:view title:title detail:detail accessoryView:accessoryView textColor:textColor textShadowColor:nil backgroundColor:bgColor animated:animated hideAfter:delay];
+}
++ (YRDropdownView *)showDropdownInView:(UIView *)view
+                                 title:(NSString *)title
+                                detail:(NSString *)detail
+						 accessoryView:(UIView *)accessoryView
+							 textColor:(UIColor *)textColor
+                       textShadowColor:(UIColor *)textShadowColor
+					   backgroundColor:(UIColor *)bgColor
+                              animated:(BOOL)animated
+                             hideAfter:(float)delay;
+{
+    return [self showDropdownInView:view
+                              title:title
+                             detail:detail
+                      accessoryView:accessoryView
+                          textColor:textColor
+                    textShadowColor:textShadowColor
+                 backgroundTopColor:bgColor
+              backgroundBottomColor:bgColor
+                           animated:animated
+                          hideAfter:delay];
+}
+
++ (YRDropdownView *)showDropdownInView:(UIView *)view
+                                 title:(NSString *)title
+                                detail:(NSString *)detail
+						 accessoryView:(UIView *)accessoryView
+                                 style:(YRDropdownViewType)styleType
+                              animated:(BOOL)animated
+                             hideAfter:(float)delay
+{
+    YRDropdownView *dropDown;
+    switch (styleType) {
+        case YRDropdownViewTypeSuccess:
+            dropDown = [YRDropdownView showDropdownInView:view
+                                                title:title
+                                               detail:detail
+                                        accessoryView:accessoryView
+                                            textColor:[UIColor whiteColor]
+                                      textShadowColor:[UIColor blackColor]
+                                   backgroundTopColor:[UIColor colorWithRed:0.000 green:0.519 blue:0.000 alpha:1.000]
+                                backgroundBottomColor:[UIColor colorWithRed:0.000 green:0.305 blue:0.000 alpha:1.000]
+                                             animated:animated
+                                            hideAfter:delay];
+                    
+            break;
+        case YRDropdownViewTypeNotice:
+            dropDown = [YRDropdownView showDropdownInView:view
+                                                    title:title
+                                                   detail:detail
+                                            accessoryView:accessoryView
+                                                textColor:[UIColor whiteColor]
+                                          textShadowColor:[UIColor blackColor]
+                                       backgroundTopColor:[UIColor colorWithRed:0.017 green:0.480 blue:0.872 alpha:1.000]
+                                    backgroundBottomColor:[UIColor colorWithRed:0.017 green:0.292 blue:0.630 alpha:1.000]
+                                                 animated:animated
+                                                hideAfter:delay];
+            break;
+        case YRDropdownViewTypeWarning:
+            dropDown = [YRDropdownView showDropdownInView:view
+                                                    title:title
+                                                   detail:detail
+                                            accessoryView:accessoryView
+                                                 animated:animated
+                                                hideAfter:delay];
+            break;
+        case YRDropdownViewTypeError:
+            dropDown = [YRDropdownView showDropdownInView:view
+                                                    title:title
+                                                   detail:detail
+                                            accessoryView:accessoryView
+                                                textColor:[UIColor whiteColor]
+                                          textShadowColor:[UIColor blackColor]
+                                       backgroundTopColor:[UIColor colorWithRed:0.755 green:0.000 blue:0.000 alpha:1.000]
+                                    backgroundBottomColor:[UIColor colorWithRed:0.551 green:0.000 blue:0.000 alpha:1.000]
+                                                 animated:animated
+                                                hideAfter:delay];            
+            break;
+        default:
+            break;
+    }
+    
+    return dropDown;
+}
++ (YRDropdownView *)showDropdownInView:(UIView *)view
+                                 title:(NSString *)title
+                                detail:(NSString *)detail
+						 accessoryView:(UIView *)accessoryView
+							 textColor:(UIColor *)textColor
+                       textShadowColor:(UIColor *)textShadowColor
+                    backgroundTopColor:(UIColor *)bgTopColor
+                 backgroundBottomColor:(UIColor *)bgBottomColor
+                              animated:(BOOL)animated
+                             hideAfter:(float)delay
+{
 	YRDropdownView *dropdown = [[YRDropdownView alloc] initWithFrame:CGRectMake(0, 0, view.bounds.size.width, 44)];
 	if (![view isKindOfClass:[UIWindow class]])
 	{
@@ -338,9 +447,14 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
 		dropdown.textColor = textColor;
 		dropdown.titleTextColor = textColor;
 	}
+    
+    if (textShadowColor) {
+        dropdown.textShadowColor = textShadowColor;
+        dropdown.titleTextShadowColor = textShadowColor;
+    }
 	
-	if (bgColor) {
-		dropdown.backgroundColors = @[bgColor, bgColor];
+	if (bgTopColor && bgBottomColor) {
+		dropdown.backgroundColors = @[bgTopColor, bgBottomColor];
 	}
 
 	dropdown.shouldAnimate = animated;
@@ -497,12 +611,17 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
 
 	// Set label properties
 	if ([self.titleText length] > 0) {
-		self.titleLabel.font = [UIFont boldSystemFontOfSize:TITLE_FONT_SIZE];
+        if (defaultTitleFontName) {
+            self.titleLabel.font = [UIFont fontWithName:defaultTitleFontName size:TITLE_FONT_SIZE];
+        }else{
+            self.titleLabel.font = [UIFont boldSystemFontOfSize:TITLE_FONT_SIZE];
+        }
+
 		self.titleLabel.adjustsFontSizeToFitWidth = NO;
 		self.titleLabel.opaque = NO;
 		self.titleLabel.backgroundColor = [UIColor clearColor];
 		self.titleLabel.textColor = _titleTextColor;
-		self.titleLabel.shadowOffset = CGSizeMake(0, 1); // CALayer already translates pixel size
+		self.titleLabel.shadowOffset = CGSizeMake(0, -0.5); // CALayer already translates pixel size
 		self.titleLabel.shadowColor = _titleTextShadowColor;
 		[self.titleLabel sizeToFitFixedWidth:bounds.size.width - (2 * HORIZONTAL_PADDING)];
 
@@ -514,14 +633,19 @@ static BOOL isQueuing = NO; // keep queuing property here - gregwym
 	}
 
 	if ([self.detailText length] > 0) {
-		self.detailLabel.font = [UIFont systemFontOfSize:DETAIL_FONT_SIZE];
+        if (defaultDetailFontName) {
+            self.detailLabel.font = [UIFont fontWithName:defaultDetailFontName size:DETAIL_FONT_SIZE];
+        }else{
+            self.detailLabel.font = [UIFont systemFontOfSize:DETAIL_FONT_SIZE];
+        }
+
 		self.detailLabel.numberOfLines = 0;
 		self.detailLabel.adjustsFontSizeToFitWidth = NO;
 		self.detailLabel.opaque = NO;
 		self.detailLabel.backgroundColor = [UIColor clearColor];
 		self.detailLabel.textColor = _textColor;
-		self.detailLabel.shadowOffset = CGSizeMake(0, 1);
-		self.detailLabel.shadowColor = _textShadowColor;
+//		self.detailLabel.shadowOffset = CGSizeMake(0, -1);
+//		self.detailLabel.shadowColor = _textShadowColor;
 		[self.detailLabel sizeToFitFixedWidth:bounds.size.width - (2 * HORIZONTAL_PADDING)];
 		
 		self.detailLabel.frame = CGRectMake(bounds.origin.x + HORIZONTAL_PADDING,
