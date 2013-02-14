@@ -763,7 +763,7 @@ static NSString *defaultDetailFontName = nil;
     else
     {
         CGRect newFrame = currentDropdown.frame;
-        newFrame.size.width = currentDropdown.superview.frame.size.width;
+        newFrame.size.width = currentDropdown.superview.bounds.size.width;
         currentDropdown.frame = newFrame;
     }
 }
